@@ -4,11 +4,10 @@ import { redirect } from "next/navigation";
 import LoginForm from "@/components/LoginForm";
 
 export default function LoginPage() {
-  const cookieStore = cookies();
+  const cookieStore = cookies(); // ✅ síncrono
   const token = cookieStore.get("token")?.value;
 
   if (token) {
-    // Ya hay sesión iniciada
     redirect("/dashboard");
   }
 
