@@ -8,16 +8,22 @@ export default function ManageProductsPage() {
 
   useEffect(() => {
     const fetchUserAndAssignments = async () => {
-      // Verificar usuario
-      const resUser = await fetch("/api/me", { credentials: "include" });
-      const dataUser = await resUser.json();
-      setUser(dataUser.user);
+      try {
+        // Verificar usuario
+        const resUser = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me`, {
+          credentials: "include",
+        });
+        const dataUser = await resUser.json();
+        setUser(dataUser.user);
 
-      // Solo admins cargan asignaciones
-      if (dataUser.user?.role === "admin") {
-        const res = await fetch("/api/products/manage");
-        const data = await res.json();
-        setAssignments(data);
+        // Solo admins cargan asignaciones
+        if (dataUser.user?.role === "admin") {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/manage`);
+          const data = await res.json();
+          setAssignments(data);
+        }
+      } catch (error) {
+        console.error("Error cargando usuario/asignaciones:", error);
       }
     };
     fetchUserAndAssignments();
@@ -70,14 +76,19 @@ export default function ManageProductsPage() {
                 <td className="px-4 py-2">
                   <button
                     onClick={async () => {
-                      const res = await fetch(`/api/products/revoke`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ id: a.id }),
-                      });
-                      const data = await res.json();
-                      setMessage(data.message || data.error);
-                      setAssignments((prev) => prev.filter((x) => x.id !== a.id));
+                      try {
+                        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/revoke`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ id: a.id }),
+                        });
+                        const data = await res.json();
+                        setMessage(data.message || data.error);
+                        setAssignments((prev) => prev.filter((x) => x.id !== a.id));
+                      } catch (error) {
+                        console.error("Error revocando producto:", error);
+                        setMessage("Error al revocar producto.");
+                      }
                     }}
                     className="px-3 py-1 bg-red-600 rounded-lg hover:bg-red-700 transition"
                   >

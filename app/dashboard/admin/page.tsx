@@ -11,15 +11,21 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     const fetchUserAndStats = async () => {
-      // Verificar usuario
-      const resUser = await fetch("/api/me", { credentials: "include" });
-      const dataUser = await resUser.json();
-      setUser(dataUser.user);
+      try {
+        // Verificar usuario
+        const resUser = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me`, {
+          credentials: "include",
+        });
+        const dataUser = await resUser.json();
+        setUser(dataUser.user);
 
-      // Cargar estadísticas
-      const resStats = await fetch("/api/stats");
-      const dataStats = await resStats.json();
-      setStats(dataStats);
+        // Cargar estadísticas
+        const resStats = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/stats`);
+        const dataStats = await resStats.json();
+        setStats(dataStats);
+      } catch (err) {
+        console.error("Error cargando datos del dashboard:", err);
+      }
     };
 
     fetchUserAndStats();

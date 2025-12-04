@@ -9,17 +9,24 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ identifier, password }),
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier, password }),
+        credentials: "include", // 🔑 importante si tu API usa cookies
+      });
 
-    if (res.ok) {
-      router.push("/dashboard");
-    } else {
-      alert(data.error);
+      const data = await res.json();
+
+      if (res.ok) {
+        router.push("/dashboard");
+      } else {
+        alert(data.error || "Error al iniciar sesión.");
+      }
+    } catch (error) {
+      console.error("Error en login:", error);
+      alert("No se pudo conectar con el servidor.");
     }
   };
 
@@ -41,6 +48,7 @@ export default function LoginForm() {
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
           className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+          required
         />
       </div>
 
@@ -55,6 +63,7 @@ export default function LoginForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="w-full px-4 py-3 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+          required
         />
         {/* 🔑 Link olvidaste contraseña */}
         <p className="mt-2 text-right text-sm">

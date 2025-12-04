@@ -8,9 +8,15 @@ export default function Navbar() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const res = await fetch("/api/me", { credentials: "include" });
-      const data = await res.json();
-      setUser(data.user);
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+        setUser(data.user);
+      } catch (error) {
+        console.error("Error verificando usuario:", error);
+      }
     };
     checkUser();
   }, []);
@@ -18,9 +24,16 @@ export default function Navbar() {
   const handleDropdownToggle = () => setDropdownOpen((prev) => !prev);
 
   const handleLogout = async () => {
-    await fetch("/api/logout", { method: "POST", credentials: "include" });
-    setDropdownOpen(false);
-    window.location.href = "/login";
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      setDropdownOpen(false);
+      window.location.href = "/login";
+    } catch (error) {
+      console.error("Error cerrando sesión:", error);
+    }
   };
 
   return (
@@ -42,9 +55,9 @@ export default function Navbar() {
           {/* Links desktop */}
           <ul className="hidden md:flex items-center space-x-8 font-medium">
             <li><a href="/" className="text-blue-500 hover:text-blue-400 transition">Home</a></li>
-            <li><a href="#" className="text-gray-300 hover:text-blue-500 transition">About</a></li>
-            <li><a href="#" className="text-gray-300 hover:text-blue-500 transition">Services</a></li>
-            <li><a href="#" className="text-gray-300 hover:text-blue-500 transition">Contact</a></li>
+            <li><a href="/about" className="text-gray-300 hover:text-blue-500 transition">About</a></li>
+            <li><a href="/services" className="text-gray-300 hover:text-blue-500 transition">Services</a></li>
+            <li><a href="/contact" className="text-gray-300 hover:text-blue-500 transition">Contact</a></li>
           </ul>
 
           {/* Usuario + hamburguesa */}
@@ -60,7 +73,6 @@ export default function Navbar() {
 
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-44 bg-neutral-800 border border-gray-700 rounded-lg shadow-lg z-50">
-                    {/* ✅ Account arriba de Dashboard */}
                     <a
                       href="/account"
                       className="block px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white"
@@ -124,9 +136,9 @@ export default function Navbar() {
         >
           <ul className="flex flex-col font-medium border border-gray-700 rounded-lg bg-neutral-800">
             <li><a href="/" className="block py-2 px-3 text-white bg-blue-600 rounded">Home</a></li>
-            <li><a href="#" className="block py-2 px-3 text-gray-300 hover:bg-gray-700 hover:text-white">About</a></li>
-            <li><a href="#" className="block py-2 px-3 text-gray-300 hover:bg-gray-700 hover:text-white">Services</a></li>
-            <li><a href="#" className="block py-2 px-3 text-gray-300 hover:bg-gray-700 hover:text-white">Contact</a></li>
+            <li><a href="/about" className="block py-2 px-3 text-gray-300 hover:bg-gray-700 hover:text-white">About</a></li>
+            <li><a href="/services" className="block py-2 px-3 text-gray-300 hover:bg-gray-700 hover:text-white">Services</a></li>
+            <li><a href="/contact" className="block py-2 px-3 text-gray-300 hover:bg-gray-700 hover:text-white">Contact</a></li>
           </ul>
         </div>
       </div>

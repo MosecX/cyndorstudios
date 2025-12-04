@@ -7,13 +7,19 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch("/api/forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json();
-    setMessage(data.message);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+      setMessage(data.message || data.error || "Error al procesar la solicitud.");
+    } catch (error) {
+      console.error("Error en forgot-password:", error);
+      setMessage("No se pudo conectar con el servidor.");
+    }
   };
 
   return (
@@ -31,6 +37,7 @@ export default function ForgotPasswordPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full px-4 py-2 mb-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
         />
         <button
           type="submit"

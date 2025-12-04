@@ -10,16 +10,23 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchUserAndProducts = async () => {
       try {
-        const res = await fetch("/api/me", { credentials: "include" });
+        // Verificar usuario
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me`, {
+          credentials: "include",
+        });
         const data = await res.json();
         setUser(data.user);
 
+        // Si hay usuario, cargar productos
         if (data.user) {
-          const resProducts = await fetch("/api/products/user", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: data.user.id }),
-          });
+          const resProducts = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/products/user`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ userId: data.user.id }),
+            }
+          );
           if (resProducts.ok) {
             const dataProducts = await resProducts.json();
             setProducts(dataProducts);
@@ -33,7 +40,7 @@ export default function DashboardPage() {
     const measurePing = async () => {
       try {
         const start = performance.now();
-        const res = await fetch("/api/ping");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ping`);
         const data = await res.json();
         const end = performance.now();
 

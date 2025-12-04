@@ -13,13 +13,15 @@ export default function AssignProductPage() {
     const fetchData = async () => {
       try {
         // Obtener el usuario logueado
-        const resMe = await fetch("/api/me", { credentials: "include" });
+        const resMe = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me`, {
+          credentials: "include",
+        });
         const dataMe = await resMe.json();
         setUser(dataMe.user);
 
         // Obtener usuarios y productos
-        const resUsers = await fetch("/api/users/list");
-        const resProducts = await fetch("/api/products/list");
+        const resUsers = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/list`);
+        const resProducts = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/list`);
 
         const usersData = await resUsers.json();
         const productsData = await resProducts.json();
@@ -41,18 +43,23 @@ export default function AssignProductPage() {
       return;
     }
 
-    const res = await fetch("/api/products/assign", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        adminId: user.id,
-        userId: parseInt(selectedUser),
-        productId: parseInt(selectedProduct),
-      }),
-    });
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/assign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          adminId: user.id,
+          userId: parseInt(selectedUser),
+          productId: parseInt(selectedProduct),
+        }),
+      });
 
-    const data = await res.json();
-    setMessage(data.message || data.error);
+      const data = await res.json();
+      setMessage(data.message || data.error);
+    } catch (error) {
+      console.error("Error asignando producto:", error);
+      setMessage("Error al asignar producto.");
+    }
   };
 
   // Bloqueos iguales al CreateProductPage

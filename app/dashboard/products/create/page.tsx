@@ -10,9 +10,15 @@ export default function CreateProductPage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const res = await fetch("/api/me", { credentials: "include" });
-      const data = await res.json();
-      setUser(data.user);
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+        setUser(data.user);
+      } catch (error) {
+        console.error("Error obteniendo usuario:", error);
+      }
     };
     fetchUser();
   }, []);
@@ -25,25 +31,30 @@ export default function CreateProductPage() {
       return;
     }
 
-    const res = await fetch("/api/products/create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: user.id, // ✅ ahora se usa el admin logueado
-        name,
-        description,
-        type,
-      }),
-    });
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id, // ✅ ahora se usa el admin logueado
+          name,
+          description,
+          type,
+        }),
+      });
 
-    const data = await res.json();
-    setMessage(data.message || data.error);
+      const data = await res.json();
+      setMessage(data.message || data.error);
 
-    // limpiar formulario si fue exitoso
-    if (data.message) {
-      setName("");
-      setDescription("");
-      setType("license");
+      // limpiar formulario si fue exitoso
+      if (data.message) {
+        setName("");
+        setDescription("");
+        setType("license");
+      }
+    } catch (error) {
+      console.error("Error creando producto:", error);
+      setMessage("Error al crear producto.");
     }
   };
 

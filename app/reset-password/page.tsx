@@ -9,14 +9,31 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get("token");
-    fetch("/api/validate-token", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    }).then(async (res) => {
-      if (res.ok) setValid(true);
-      else setMessage("Token inválido o expirado.");
-    });
+    if (!token) {
+      setMessage("Token inválido o faltante.");
+      return;
+    }
+
+    const validateToken = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/validate-token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        });
+
+        if (res.ok) {
+          setValid(true);
+        } else {
+          setMessage("Token inválido o expirado.");
+        }
+      } catch (error) {
+        console.error("Error validando token:", error);
+        setMessage("Error al validar el token.");
+      }
+    };
+
+    validateToken();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,18 +42,30 @@ export default function ResetPasswordPage() {
       setMessage("Las contraseñas no coinciden.");
       return;
     }
+
     const token = new URLSearchParams(window.location.search).get("token");
-    const res = await fetch("/api/reset-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, newPassword: password }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setMessage("Contraseña actualizada con éxito. Redirigiendo...");
-      setTimeout(() => (window.location.href = "/login"), 2000);
-    } else {
-      setMessage(data.error || "Error al actualizar la contraseña.");
+    if (!token) {
+      setMessage("Token inválido o faltante.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, newPassword: password }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setMessage("Contraseña actualizada con éxito. Redirigiendo...");
+        setTimeout(() => (window.location.href = "/login"), 2000);
+      } else {
+        setMessage(data.error || "Error al actualizar la contraseña.");
+      }
+    } catch (error) {
+      console.error("Error en reset-password:", error);
+      setMessage("No se pudo conectar con el servidor.");
     }
   };
 
@@ -45,7 +74,7 @@ export default function ResetPasswordPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-950">
         <p className="text-red-500 text-center mt-6">
-          Este enlace ha expirado. Volvé a solicitar recuperación.
+          {message || "Este enlace ha expirado. Volvé a solicitar recuperación."}
         </p>
         <a
           href="/forgot-password"
@@ -73,6 +102,7 @@ export default function ResetPasswordPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="w-full px-4 py-2 mb-4 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
         />
         <input
           type="password"
@@ -80,6 +110,7 @@ export default function ResetPasswordPage() {
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           className="w-full px-4 py-2 mb-6 rounded-lg bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
         />
         <button
           type="submit"
